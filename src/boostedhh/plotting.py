@@ -1329,3 +1329,80 @@ def cutsLinePlot(
         plt.show()
     else:
         plt.close()
+
+
+def plot_hist(
+    data,
+    names,
+    nbins=100,
+    weights=None,
+    xlabel=None,
+    saveas=None,
+    text=None,
+    xlim=None,
+    log=False,
+    density=False,
+    int_xticks=False,
+    lumi=None,
+    year=None,
+    com=13.6,
+):
+    """Lightweight plotter for histograms.
+    Args:
+    data (list): List of data arrays to plot.
+    names (list): List of names for each data array.
+    nbins (int): Number of bins for the histogram.
+    weights (list): List of weights for each data array.
+    """
+
+    hep.style.use("CMS")
+    colors = plt.cm.tab10.colors
+    fig, ax = plt.subplots(figsize=(12, 9))
+    hep.cms.label("Preliminary", data=True, lumi=lumi, year=year, com=com)
+    if weights is not None:
+        for d, w, name, c in zip(data, weights, names, colors[: len(data)]):
+            ax.hist(
+                d,
+                bins=nbins,
+                weights=w,
+                range=xlim,
+                label=name,
+                color=c,
+                density=density,
+                log=log,
+                histtype="step",
+                linewidth=2,
+            )
+    else:
+        for d, name, c in zip(data, names, colors[: len(data)]):
+            ax.hist(
+                d,
+                bins=nbins,
+                range=xlim,
+                label=name,
+                color=c,
+                density=density,
+                log=log,
+                histtype="step",
+                linewidth=2,
+            )
+    if xlabel:
+        ax.set_xlabel(xlabel)
+    if text is not None:
+        ax.text(
+            0.02,
+            0.6,
+            text,
+            fontsize=13,
+            bbox={"facecolor": "white", "edgecolor": "black"},
+            transform=ax.transAxes,
+        )
+    if int_xticks:
+        ax.xaxis.get_major_locator().set_params(integer=True)
+    ax.set_ylabel("Normalized frequency")
+    ax.set_xlim(xlim)
+    ax.legend()
+    if saveas:
+        plt.savefig(saveas)
+        print(f"saved figure as {saveas}")
+    plt.close()
