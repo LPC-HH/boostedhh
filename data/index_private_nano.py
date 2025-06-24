@@ -23,6 +23,21 @@ def _dirlist(fs, path) -> list:
 
     return [f.name for f in listing]
 
+def _has_new_structure(fs, base_dir, user, years):
+    """Check if the directory uses the new structure (data_{year}, mc_{year}) or old structure ({year})."""
+    user_path = base_dir / user
+    try:
+        user_contents = _dirlist(fs, user_path)
+    except FileNotFoundError:
+        return False
+    
+    # Check if any data_{year} or mc_{year} directories exist
+    for year in years:
+        if f"data_{year}" in user_contents or f"mc_{year}" in user_contents:
+            return True
+    
+    return False
+
 
 def xrootd_index_private_nano(
     base_dir: str,
@@ -39,21 +54,21 @@ def xrootd_index_private_nano(
     Can specify specific users, years, samples, and subsamples to search for;
     otherwise, it will search for all by default.
 
-    Files are organized as:
+    Supports both old and new directory structures:
 
+    Old structure:
     MC:
     ......redirector.......|...............base_dir....................|..user.|year|sample|
     root://cmseos.fnal.gov//store/user/lpcdihiggsboost/NanoAOD_v12_ParT/rkansal/2022/HHbbtt/
-    ....................................subsample.......................................|
-    GluGlutoHHto2B2Tau_kl-1p00_kt-1p00_c2-0p00_LHEweights_TuneCP5_13p6TeV_powheg-pythia8/
-    .............................f1...........................|.....f2......|.f3.|......
-    GluGlutoHHto2B2Tau_kl-1p00_kt-1p00_c2-0p00_TuneCP5_13p6TeV/241028_235514/000*/*.root
+
+    New structure:
+    MC:
+    ......redirector.......|...............base_dir....................|..user.|year|sample|
+    root://cmseos.fnal.gov//store/user/lpcdihiggsboost/NanoAOD_v12_ParT/rkansal/2022_mc/HHbbtt/
 
     Data:
     ......redirector.......|...............base_dir....................|..user.|year|sample|
-    root://cmseos.fnal.gov//store/user/lpcdihiggsboost/NanoAOD_v12_ParT/rkansal/2022/Tau/
-    .f1|..subsample.|.....f2......|.f3.|......
-    Tau/Tau_Run2022D/241114_222843/000*/*.root
+    root://cmseos.fnal.gov//store/user/lpcdihiggsboost/NanoAOD_v12_ParT/rkansal/2022_data/Tau/
     """
     fs = client.FileSystem(redirector)
     base_dir = Path(base_dir)
@@ -66,64 +81,126 @@ def xrootd_index_private_nano(
 
     for user in users:
         print(f"\t{user}")
+        
+        # Check version
+        use_new_structure = _has_new_structure(fs, base_dir, user, years)
+        print(f"\t\tUsing {'new' if use_new_structure else 'old'} directory structure")
+        
         for year in years:
             print(f"\t\t{year}")
             if year not in files:
                 files[year] = {}
 
-            ypath = base_dir / user / year
-            tsamples = _dirlist(fs, ypath) if samples is None else samples
-            for sample in tsamples:
-                if sample not in files[year]:
-                    files[year][sample] = {}
-                elif overwrite_sample:
-                    warnings.warn(f"Overwriting existing sample {sample}", stacklevel=2)
-                    files[year][sample] = {}
+            if use_new_structure:
+                # New structure: separate data_{year} and mc_{year} directories
+                for is_data in (True, False):
+                    if is_data:
+                        ypath = base_dir / user / f"data_{year}"
+                    else:
+                        ypath = base_dir / user / f"mc_{year}"
+                    
+                    tsamples = _dirlist(fs, ypath) if samples is None else samples
+                        
+                    for sample in tsamples:
+                        if sample not in files[year]:
+                            files[year][sample] = {}
+                        elif overwrite_sample:
+                            warnings.warn(f"Overwriting existing sample {sample}", stacklevel=2)
+                            files[year][sample] = {}
 
-                print(f"\t\t\t{sample}")
-                spath = ypath / sample
+                        print(f"\t\t\t{sample}")
+                        spath = ypath / sample
 
-                is_data = sample in hh_vars.DATA_SAMPLES
+                        tsubsamples = _dirlist(fs, spath) if subsamples is None else subsamples
+                        for subsample in tsubsamples:
+                            subsample_name = subsample.split("_TuneCP5")[0].split("_LHEweights")[0]
+                            if not is_data:
+                                if subsample_name in files[year][sample]:
+                                    warnings.warn(
+                                        f"Duplicate subsample found! {subsample_name}", stacklevel=2
+                                    )
 
-                tsubsamples = _dirlist(fs, spath) if subsamples is None else subsamples
-                for subsample in tsubsamples:
-                    subsample_name = subsample.split("_TuneCP5")[0].split("_LHEweights")[0]
-                    if not is_data:
-                        if subsample_name in files[year][sample]:
-                            warnings.warn(
-                                f"Duplicate subsample found! {subsample_name}", stacklevel=2
-                            )
+                                print(f"\t\t\t\t{subsample_name}")
 
-                        print(f"\t\t\t\t{subsample_name}")
+                            sspath = spath / subsample
+                            for f1 in _dirlist(fs, sspath):
+                                # For Data files, f1 is the subsample name
+                                if is_data:
+                                    if f1 in files[year][sample]:
+                                        warnings.warn(f"Duplicate subsample found! {f1}", stacklevel=2)
+                                    print(f"\t\t\t\t{f1}")
 
-                    sspath = spath / subsample
-                    for f1 in _dirlist(fs, sspath):
-                        # For Data files, f1 is the subsample name
-                        if is_data:
-                            if f1 in files[year][sample]:
-                                warnings.warn(f"Duplicate subsample found! {f1}", stacklevel=2)
+                                f1path = sspath / f1
+                                for f2 in _dirlist(fs, f1path):
+                                    f2path = f1path / f2
+                                    tfiles = []
+                                    f2_contents = _dirlist(fs, f2path)
+                                    root_files = [f for f in f2_contents if f.endswith(".root")]
+                                    if root_files:
+                                        tfiles += [f"{redirector}{f2path!s}/{f}" for f in root_files]
 
-                            print(f"\t\t\t\t{f1}")
+                                    if is_data:
+                                        files[year][sample][f1] = tfiles
+                                        print(f"\t\t\t\t\t{len(tfiles)} files")
 
-                        f1path = sspath / f1
-                        for f2 in _dirlist(fs, f1path):
-                            f2path = f1path / f2
-                            tfiles = []
-                            for f3 in _dirlist(fs, f2path):
-                                f3path = f2path / f3
-                                tfiles += [
-                                    f"{redirector}{f3path!s}/{f}"
-                                    for f in _dirlist(fs, f3path)
-                                    if f.endswith(".root")
-                                ]
+                            if not is_data:
+                                files[year][sample][subsample_name] = tfiles
+                                print(f"\t\t\t\t\t{len(tfiles)} files")
+            else:
+                # Old structure: single year directory
+                ypath = base_dir / user / year
+                tsamples = _dirlist(fs, ypath) if samples is None else samples
+                for sample in tsamples:
+                    if sample not in files[year]:
+                        files[year][sample] = {}
+                    elif overwrite_sample:
+                        warnings.warn(f"Overwriting existing sample {sample}", stacklevel=2)
+                        files[year][sample] = {}
 
-                        if is_data:
-                            files[year][sample][f1] = tfiles
+                    print(f"\t\t\t{sample}")
+                    spath = ypath / sample
+
+                    is_data = sample in hh_vars.DATA_SAMPLES
+
+                    tsubsamples = _dirlist(fs, spath) if subsamples is None else subsamples
+                    for subsample in tsubsamples:
+                        subsample_name = subsample.split("_TuneCP5")[0].split("_LHEweights")[0]
+                        if not is_data:
+                            if subsample_name in files[year][sample]:
+                                warnings.warn(
+                                    f"Duplicate subsample found! {subsample_name}", stacklevel=2
+                                )
+
+                            print(f"\t\t\t\t{subsample_name}")
+
+                        sspath = spath / subsample
+                        for f1 in _dirlist(fs, sspath):
+                            # For Data files, f1 is the subsample name
+                            if is_data:
+                                if f1 in files[year][sample]:
+                                    warnings.warn(f"Duplicate subsample found! {f1}", stacklevel=2)
+
+                                print(f"\t\t\t\t{f1}")
+
+                            f1path = sspath / f1
+                            for f2 in _dirlist(fs, f1path):
+                                f2path = f1path / f2
+                                tfiles = []
+                                for f3 in _dirlist(fs, f2path):
+                                    f3path = f2path / f3
+                                    tfiles += [
+                                        f"{redirector}{f3path!s}/{f}"
+                                        for f in _dirlist(fs, f3path)
+                                        if f.endswith(".root")
+                                    ]
+
+                            if is_data:
+                                files[year][sample][f1] = tfiles
+                                print(f"\t\t\t\t\t{len(tfiles)} files")
+
+                        if not is_data:
+                            files[year][sample][subsample_name] = tfiles
                             print(f"\t\t\t\t\t{len(tfiles)} files")
-
-                    if not is_data:
-                        files[year][sample][subsample_name] = tfiles
-                        print(f"\t\t\t\t\t{len(tfiles)} files")
 
     return files
 
