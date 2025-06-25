@@ -38,46 +38,71 @@ def _has_new_structure(fs, base_dir, user, years):
     
     return False
 
-def _get_sample_from_subsample(subsample_name):
+def _get_sample_from_subsample(subsample_name, is_data):
     """
     Determine the sample name from the subsample name using the SAMPLES dictionary.
+    Source: 
+    - https://github.com/rkansal47/Run3_nano_submission/blob/40a74eeffd5d0b935629567dc291a32c9c43abb7/datasets/get_datasets.py
+    - https://github.com/rkansal47/Run3_nano_submission/blob/40a74eeffd5d0b935629567dc291a32c9c43abb7/datasets/get_mc.py
     """    
     # If no match found, try to infer from common patterns
-    if "HHto4B" in subsample_name or "HHto2B2Tau" in subsample_name:
-        if "VBF" in subsample_name:
-            return "HHbbtt" if "2B2Tau" in subsample_name else "HH4b"
+    if is_data:
+        # Data
+        if "JetHT" in subsample_name or "JetMET" in subsample_name:
+            return "JetMET"
+        elif "EGamma" in subsample_name:
+            return "EGamma"
+        elif "Muon" in subsample_name:
+            return "Muon"
+        elif "Tau" in subsample_name:
+            return "Tau"
+        elif "BTagMu" in subsample_name:
+            return "BTagMu"
+        elif "MuonEG" in subsample_name:
+            return "MuonEG"
+        elif "ParkingVBF" in subsample_name:
+            return "ParkingVBF"
+        elif "ParkingSingleMuon" in subsample_name:
+            return "ParkingSingleMuon"
         else:
-            return "HHbbtt" if "2B2Tau" in subsample_name else "HH4b"
-    elif "Hto2B" in subsample_name:
-        return "Hbb"
-    elif "Hto2C" in subsample_name:
-        return "Hcc"
-    elif "Hto2Tau" in subsample_name or "HTo2Tau" in subsample_name:
-        return "Htautau"
-    elif "QCD-4Jets_HT" in subsample_name:
-        return "QCD-4Jets_HT"
-    elif "QCD_PT" in subsample_name:
-        return "QCD_PT"
-    elif "TTto" in subsample_name:
-        return "TT"
-    elif any(x in subsample_name for x in ["TbarWplus", "TWminus", "TbarBQ", "TBbarQ"]):
-        return "SingleTop"
-    elif "DYto2L-4Jets" in subsample_name:
-        return "DYJetsLO"
-    elif "DYto2L-2Jets" in subsample_name:
-        return "DYJetsNLO"
-    elif any(x in subsample_name for x in ["Wto2Q-3Jets", "WtoLNu-4Jets", "Zto2Q-4Jets"]):
-        return "VJetsLO"
-    elif any(x in subsample_name for x in ["Wto2Q-2Jets", "WtoLNu-2Jets", "Zto2Q-2Jets"]):
-        return "VJetsNLO"
-    elif any(x in subsample_name for x in ["WW_", "WZ_", "ZZ_", "WWto4Q", "WWtoLNu2Q", "WZto3LNu", "WZto4Q", "ZZto2L2Q", "ZZto4L"]):
-        return "Diboson"
-    elif any(x in subsample_name for x in ["VBFZto2Q", "VBFWto2Q", "VBFto2L", "VBFto2Nu", "VBFtoLNu"]):
-        return "EWKV"
-    elif any(x in subsample_name for x in ["WGtoLNuG", "WGto2QG", "ZGto2NuG", "ZGto2QG"]):
-        return "VGamma"
+            raise ValueError(f"Could not determine sample from subsample name: {subsample_name}. Please check the naming conventions.")
+    else:
+        # MC
+        if "HHto4B" in subsample_name or "HHto2B2Tau" in subsample_name:
+            if "VBF" in subsample_name:
+                return "HHbbtt" if "2B2Tau" in subsample_name else "HH4b"
+            else:
+                return "HHbbtt" if "2B2Tau" in subsample_name else "HH4b"
+        elif "Hto2B" in subsample_name:
+            return "Hbb"
+        elif "Hto2C" in subsample_name:
+            return "Hcc"
+        elif "Hto2Tau" in subsample_name or "HTo2Tau" in subsample_name:
+            return "Htautau"
+        elif "QCD-4Jets_HT" in subsample_name:
+            return "QCD-4Jets_HT"
+        elif "QCD_PT" in subsample_name:
+            return "QCD_PT"
+        elif "TTto" in subsample_name:
+            return "TT"
+        elif any(x in subsample_name for x in ["TbarWplus", "TWminus", "TbarBQ", "TBbarQ"]):
+            return "SingleTop"
+        elif "DYto2L-4Jets" in subsample_name:
+            return "DYJetsLO"
+        elif "DYto2L-2Jets" in subsample_name:
+            return "DYJetsNLO"
+        elif any(x in subsample_name for x in ["Wto2Q-3Jets", "WtoLNu-4Jets", "Zto2Q-4Jets"]):
+            return "VJetsLO"
+        elif any(x in subsample_name for x in ["Wto2Q-2Jets", "WtoLNu-2Jets", "Zto2Q-2Jets"]):
+            return "VJetsNLO"
+        elif any(x in subsample_name for x in ["WW_", "WZ_", "ZZ_", "WWto4Q", "WWtoLNu2Q", "WZto3LNu", "WZto4Q", "ZZto2L2Q", "ZZto4L"]):
+            return "Diboson"
+        elif any(x in subsample_name for x in ["VBFZto2Q", "VBFWto2Q", "VBFto2L", "VBFto2Nu", "VBFtoLNu"]):
+            return "EWKV"
+        elif any(x in subsample_name for x in ["WGtoLNuG", "WGto2QG", "ZGto2NuG", "ZGto2QG"]):
+            return "VGamma"
     
-    raise ValueError(f"Could not determine sample from subsample name: {subsample_name}. Please check the naming conventions.")
+        raise ValueError(f"Could not determine sample from subsample name: {subsample_name}. Please check the naming conventions.")
 
 
 def xrootd_index_private_nano(
@@ -119,13 +144,17 @@ def xrootd_index_private_nano(
 
     if files is None:
         files = {}
+        
+    # Check version
+    if len(users) > 0:
+        use_new_structure = _has_new_structure(fs, base_dir, users[0], years)
+        print(f"Using {'new' if use_new_structure else 'old'} directory structure")
+    else:
+        # no users to search for
+        return {}
 
     for user in users:
         print(f"\t{user}")
-        
-        # Check version
-        use_new_structure = _has_new_structure(fs, base_dir, user, years)
-        print(f"\t\tUsing {'new' if use_new_structure else 'old'} directory structure")
         
         for year in years:
             print(f"\t\t{year}")
@@ -144,13 +173,7 @@ def xrootd_index_private_nano(
                         
                     for subsample in tsubsamples:
                         print(f"\t\t\tProcessing {subsample}")
-                        # For new structure, infer sample name from subsample
-                        if is_data:
-                            # For data, the subsample IS the sample (e.g., "Tau", "JetMET")
-                            sample = subsample
-                        else:
-                            # For MC, infer sample from subsample name
-                            sample = _get_sample_from_subsample(subsample)
+                        sample = _get_sample_from_subsample(subsample, is_data)
                         
                         # Filter by samples if specified
                         if samples is not None and sample not in samples:
@@ -181,12 +204,6 @@ def xrootd_index_private_nano(
                         tfiles = []
                         try:
                             for f1 in _dirlist(fs, spath):  # dataset directory
-                                # For Data files, f1 is the subsample name
-                                if is_data:
-                                    if f1 in files[year][sample]:
-                                        warnings.warn(f"Duplicate subsample found! {f1}", stacklevel=2)
-                                    print(f"\t\t\t\t{f1}")
-
                                 f1path = spath / f1
                                 for f2 in _dirlist(fs, f1path):  # timestamp directory
                                     f2path = f1path / f2
@@ -198,16 +215,16 @@ def xrootd_index_private_nano(
                                             tfiles += [f"{redirector}{f3path!s}/{f}" for f in root_files]
 
                                 if is_data:
-                                    files[year][sample][f1] = tfiles
-                                    print(f"\t\t\t\t\t{len(tfiles)} files")
+                                    # For data, concatenate files from related subsamples
+                                    # e.g. EGamma0 and EGamma1 should be combined
+                                    if f1 not in files[year][sample]:
+                                        files[year][sample][f1] = []
+                                    files[year][sample][f1].extend(tfiles)
+                                    print(f"\t\t\t\t\t{len(tfiles)} files added")
 
                             if not is_data:
                                 files[year][sample][subsample_name] = tfiles
                                 print(f"\t\t\t\t\t{len(tfiles)} files")
-                                
-                        except FileNotFoundError:
-                            print(f"\t\t\t\tWarning: Could not access {spath}")
-                            continue
                                 
                         except FileNotFoundError:
                             print(f"\t\t\t\tWarning: Could not access {spath}")
