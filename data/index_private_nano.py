@@ -38,6 +38,47 @@ def _has_new_structure(fs, base_dir, user, years):
     
     return False
 
+def _get_sample_from_subsample(subsample_name):
+    """
+    Determine the sample name from the subsample name using the SAMPLES dictionary.
+    """    
+    # If no match found, try to infer from common patterns
+    if "HHto4B" in subsample_name or "HHto2B2Tau" in subsample_name:
+        if "VBF" in subsample_name:
+            return "HHbbtt" if "2B2Tau" in subsample_name else "HH4b"
+        else:
+            return "HHbbtt" if "2B2Tau" in subsample_name else "HH4b"
+    elif "Hto2B" in subsample_name:
+        return "Hbb"
+    elif "Hto2C" in subsample_name:
+        return "Hcc"
+    elif "Hto2Tau" in subsample_name or "HTo2Tau" in subsample_name:
+        return "Htautau"
+    elif "QCD-4Jets_HT" in subsample_name:
+        return "QCD-4Jets_HT"
+    elif "QCD_PT" in subsample_name:
+        return "QCD_PT"
+    elif "TTto" in subsample_name:
+        return "TT"
+    elif any(x in subsample_name for x in ["TbarWplus", "TWminus", "TbarBQ", "TBbarQ"]):
+        return "SingleTop"
+    elif "DYto2L-4Jets" in subsample_name:
+        return "DYJetsLO"
+    elif "DYto2L-2Jets" in subsample_name:
+        return "DYJetsNLO"
+    elif any(x in subsample_name for x in ["Wto2Q-3Jets", "WtoLNu-4Jets", "Zto2Q-4Jets"]):
+        return "VJetsLO"
+    elif any(x in subsample_name for x in ["Wto2Q-2Jets", "WtoLNu-2Jets", "Zto2Q-2Jets"]):
+        return "VJetsNLO"
+    elif any(x in subsample_name for x in ["WW_", "WZ_", "ZZ_", "WWto4Q", "WWtoLNu2Q", "WZto3LNu", "WZto4Q", "ZZto2L2Q", "ZZto4L"]):
+        return "Diboson"
+    elif any(x in subsample_name for x in ["VBFZto2Q", "VBFWto2Q", "VBFto2L", "VBFto2Nu", "VBFtoLNu"]):
+        return "EWKV"
+    elif any(x in subsample_name for x in ["WGtoLNuG", "WGto2QG", "ZGto2NuG", "ZGto2QG"]):
+        return "VGamma"
+    
+    raise ValueError(f"Could not determine sample from subsample name: {subsample_name}. Please check the naming conventions.")
+
 
 def xrootd_index_private_nano(
     base_dir: str,
@@ -99,9 +140,22 @@ def xrootd_index_private_nano(
                     else:
                         ypath = base_dir / user / f"mc_{year}"
                     
-                    tsamples = _dirlist(fs, ypath) if samples is None else samples
+                    tsubsamples = _dirlist(fs, ypath) if subsamples is None else subsamples
                         
-                    for sample in tsamples:
+                    for subsample in tsubsamples:
+                        print(f"\t\t\tProcessing {subsample}")
+                        # For new structure, infer sample name from subsample
+                        if is_data:
+                            # For data, the subsample IS the sample (e.g., "Tau", "JetMET")
+                            sample = subsample
+                        else:
+                            # For MC, infer sample from subsample name
+                            sample = _get_sample_from_subsample(subsample)
+                        
+                        # Filter by samples if specified
+                        if samples is not None and sample not in samples:
+                            continue
+                            
                         if sample not in files[year]:
                             files[year][sample] = {}
                         elif overwrite_sample:
@@ -109,47 +163,64 @@ def xrootd_index_private_nano(
                             files[year][sample] = {}
 
                         print(f"\t\t\t{sample}")
-                        spath = ypath / sample
+                        spath = ypath / subsample
 
-                        tsubsamples = _dirlist(fs, spath) if subsamples is None else subsamples
-                        for subsample in tsubsamples:
-                            subsample_name = subsample.split("_TuneCP5")[0].split("_LHEweights")[0]
-                            if not is_data:
-                                if subsample_name in files[year][sample]:
-                                    warnings.warn(
-                                        f"Duplicate subsample found! {subsample_name}", stacklevel=2
-                                    )
+                        # Clean subsample name
+                        subsample_name = subsample.split("_TuneCP5")[0].split("_LHEweights")[0]
+                        print(f"\t\t\t\t{subsample_name}")
+                        
+                        if not is_data:
+                            if subsample_name in files[year][sample]:
+                                warnings.warn(
+                                    f"Duplicate subsample found! {subsample=} ({subsample_name=}) for {year=}",
+                                    stacklevel=2
+                                )
+                            print(f"\t\t\t\t{subsample_name}")
 
-                                print(f"\t\t\t\t{subsample_name}")
-
-                            sspath = spath / subsample
-                            for f1 in _dirlist(fs, sspath):
+                        # Navigate through the directory structure (4 levels for new structure)
+                        tfiles = []
+                        try:
+                            for f1 in _dirlist(fs, spath):  # dataset directory
                                 # For Data files, f1 is the subsample name
                                 if is_data:
                                     if f1 in files[year][sample]:
                                         warnings.warn(f"Duplicate subsample found! {f1}", stacklevel=2)
                                     print(f"\t\t\t\t{f1}")
 
-                                f1path = sspath / f1
-                                for f2 in _dirlist(fs, f1path):
+                                f1path = spath / f1
+                                for f2 in _dirlist(fs, f1path):  # timestamp directory
                                     f2path = f1path / f2
-                                    tfiles = []
-                                    f2_contents = _dirlist(fs, f2path)
-                                    root_files = [f for f in f2_contents if f.endswith(".root")]
-                                    if root_files:
-                                        tfiles += [f"{redirector}{f2path!s}/{f}" for f in root_files]
+                                    for f3 in _dirlist(fs, f2path):  # chunk directory (0000, 0001, etc.)
+                                        f3path = f2path / f3
+                                        f3_contents = _dirlist(fs, f3path)
+                                        root_files = [f for f in f3_contents if f.endswith(".root")]
+                                        if root_files:
+                                            tfiles += [f"{redirector}{f3path!s}/{f}" for f in root_files]
 
-                                    if is_data:
-                                        files[year][sample][f1] = tfiles
-                                        print(f"\t\t\t\t\t{len(tfiles)} files")
+                                if is_data:
+                                    files[year][sample][f1] = tfiles
+                                    print(f"\t\t\t\t\t{len(tfiles)} files")
 
                             if not is_data:
                                 files[year][sample][subsample_name] = tfiles
                                 print(f"\t\t\t\t\t{len(tfiles)} files")
+                                
+                        except FileNotFoundError:
+                            print(f"\t\t\t\tWarning: Could not access {spath}")
+                            continue
+                                
+                        except FileNotFoundError:
+                            print(f"\t\t\t\tWarning: Could not access {spath}")
+                            continue
+                            
             else:
                 # Old structure: single year directory
                 ypath = base_dir / user / year
-                tsamples = _dirlist(fs, ypath) if samples is None else samples
+                try:
+                    tsamples = _dirlist(fs, ypath) if samples is None else samples
+                except FileNotFoundError:
+                    continue
+                    
                 for sample in tsamples:
                     if sample not in files[year]:
                         files[year][sample] = {}
@@ -162,7 +233,11 @@ def xrootd_index_private_nano(
 
                     is_data = sample in hh_vars.DATA_SAMPLES
 
-                    tsubsamples = _dirlist(fs, spath) if subsamples is None else subsamples
+                    try:
+                        tsubsamples = _dirlist(fs, spath) if subsamples is None else subsamples
+                    except FileNotFoundError:
+                        continue
+                        
                     for subsample in tsubsamples:
                         subsample_name = subsample.split("_TuneCP5")[0].split("_LHEweights")[0]
                         if not is_data:
@@ -174,36 +249,40 @@ def xrootd_index_private_nano(
                             print(f"\t\t\t\t{subsample_name}")
 
                         sspath = spath / subsample
-                        for f1 in _dirlist(fs, sspath):
-                            # For Data files, f1 is the subsample name
-                            if is_data:
-                                if f1 in files[year][sample]:
-                                    warnings.warn(f"Duplicate subsample found! {f1}", stacklevel=2)
+                        try:
+                            for f1 in _dirlist(fs, sspath):
+                                # For Data files, f1 is the subsample name
+                                if is_data:
+                                    if f1 in files[year][sample]:
+                                        warnings.warn(f"Duplicate subsample found! {f1}", stacklevel=2)
 
-                                print(f"\t\t\t\t{f1}")
+                                    print(f"\t\t\t\t{f1}")
 
-                            f1path = sspath / f1
-                            for f2 in _dirlist(fs, f1path):
-                                f2path = f1path / f2
-                                tfiles = []
-                                for f3 in _dirlist(fs, f2path):
-                                    f3path = f2path / f3
-                                    tfiles += [
-                                        f"{redirector}{f3path!s}/{f}"
-                                        for f in _dirlist(fs, f3path)
-                                        if f.endswith(".root")
-                                    ]
+                                f1path = sspath / f1
+                                for f2 in _dirlist(fs, f1path):
+                                    f2path = f1path / f2
+                                    tfiles = []
+                                    for f3 in _dirlist(fs, f2path):
+                                        f3path = f2path / f3
+                                        tfiles += [
+                                            f"{redirector}{f3path!s}/{f}"
+                                            for f in _dirlist(fs, f3path)
+                                            if f.endswith(".root")
+                                        ]
 
-                            if is_data:
-                                files[year][sample][f1] = tfiles
+                                if is_data:
+                                    files[year][sample][f1] = tfiles
+                                    print(f"\t\t\t\t\t{len(tfiles)} files")
+
+                            if not is_data:
+                                files[year][sample][subsample_name] = tfiles
                                 print(f"\t\t\t\t\t{len(tfiles)} files")
-
-                        if not is_data:
-                            files[year][sample][subsample_name] = tfiles
-                            print(f"\t\t\t\t\t{len(tfiles)} files")
+                                
+                        except FileNotFoundError:
+                            print(f"\t\t\t\tWarning: Could not access {sspath}")
+                            continue
 
     return files
-
 
 def main():
     # Set up argument parser
