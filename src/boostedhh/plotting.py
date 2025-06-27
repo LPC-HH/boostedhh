@@ -845,16 +845,30 @@ def multiROCCurveGreyOld(
         plt.close()
 
 
+# th_colours = [
+#     "#36213E",
+#     "#9381FF",
+#     "#1f78b4",
+#     "#a6cee3",
+#     "#32965D",
+#     "#7CB518",
+#     "#EDB458",
+#     "#ff7f00",
+#     "#a70000",
+# ]
+
+# Updated with CMS color palette
 th_colours = [
-    "#36213E",
-    # "#9381FF",
-    "#1f78b4",
-    "#a6cee3",
-    # "#32965D",
-    "#7CB518",
-    "#EDB458",
-    "#ff7f00",
-    "#a70000",
+    "#3f90da",
+    "#ffa90e",
+    "#bd1f01",
+    "#94a4a2",
+    "#832db6",
+    "#a96b59",
+    "#e76300",
+    "#b9ac70",
+    "#717581",
+    "#92dadd",
 ]
 
 
@@ -1403,6 +1417,6 @@ def plot_hist(
     ax.set_xlim(xlim)
     ax.legend()
     if saveas:
-        plt.savefig(saveas)
+        plt.savefig(saveas, bbox_inches="tight")
         print(f"saved figure as {saveas}")
     plt.close()
