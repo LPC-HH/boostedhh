@@ -80,7 +80,7 @@ def _get_sample_from_subsample(subsample_name, is_data):
         elif "Hto2Tau" in subsample_name or "HTo2Tau" in subsample_name:
             return "Htautau"
         elif "QCD-4Jets_HT" in subsample_name:
-            return "QCD-4Jets_HT"
+            return "QCD"
         elif "QCD_PT" in subsample_name:
             return "QCD_PT"
         elif "TTto" in subsample_name:
@@ -218,8 +218,8 @@ def xrootd_index_private_nano(
                                     # For data, concatenate files from related subsamples
                                     # e.g. EGamma0 and EGamma1 should be combined
                                     if f1 not in files[year][sample]:
-                                        files[year][sample][f1] = []
-                                    files[year][sample][f1].extend(tfiles)
+                                        files[year][sample][f"{sample}_{f1}"] = []
+                                    files[year][sample][f"{sample}_{f1}"].extend(tfiles)
                                     print(f"\t\t\t\t\t{len(tfiles)} files added")
 
                             if not is_data:
