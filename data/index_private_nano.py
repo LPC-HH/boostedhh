@@ -218,8 +218,8 @@ def xrootd_index_private_nano(
                                     # For data, concatenate files from related subsamples
                                     # e.g. EGamma0 and EGamma1 should be combined
                                     if f1 not in files[year][sample]:
-                                        files[year][sample][f"{sample}_{f1}"] = []
-                                    files[year][sample][f"{sample}_{f1}"].extend(tfiles)
+                                        files[year][sample][f1] = []
+                                    files[year][sample][f1].extend(tfiles)
                                     print(f"\t\t\t\t\t{len(tfiles)} files added")
 
                             if not is_data:
