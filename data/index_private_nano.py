@@ -215,11 +215,12 @@ def xrootd_index_private_nano(
                                             tfiles += [f"{redirector}{f3path!s}/{f}" for f in root_files]
 
                                 if is_data:
+                                    subsample_key = f"{sample}_{f1}".replace("_DAZSLE_PFNano", "")
                                     # For data, concatenate files from related subsamples
                                     # e.g. EGamma0 and EGamma1 should be combined
-                                    if f1 not in files[year][sample]:
-                                        files[year][sample][f1] = []
-                                    files[year][sample][f1].extend(tfiles)
+                                    if subsample_key not in files[year][sample]:
+                                        files[year][sample][subsample_key] = []
+                                    files[year][sample][subsample_key].extend(tfiles)
                                     print(f"\t\t\t\t\t{len(tfiles)} files added")
 
                             if not is_data:
