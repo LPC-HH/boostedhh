@@ -201,10 +201,11 @@ def xrootd_index_private_nano(
                             print(f"\t\t\t\t{subsample_name}")
 
                         # Navigate through the directory structure (4 levels for new structure)
-                        tfiles = []
                         try:
                             for f1 in _dirlist(fs, spath):  # dataset directory
                                 f1path = spath / f1
+                                tfiles = []  # Reset for each dataset directory
+                                
                                 for f2 in _dirlist(fs, f1path):  # timestamp directory
                                     f2path = f1path / f2
                                     for f3 in _dirlist(fs, f2path):  # chunk directory (0000, 0001, etc.)
@@ -214,15 +215,17 @@ def xrootd_index_private_nano(
                                         if root_files:
                                             tfiles += [f"{redirector}{f3path!s}/{f}" for f in root_files]
 
+                                # Process files for this specific dataset directory
                                 if is_data:
-                                    subsample_key = f"{sample}_{f1}".replace("_DAZSLE_PFNano", "")
-                                    # For data, concatenate files from related subsamples
-                                    # e.g. EGamma0 and EGamma1 should be combined
+                                    run_info = f1.replace("_DAZSLE_PFNano", "")
+                                    subsample_key = f"{sample}_{run_info}"
+                                    
                                     if subsample_key not in files[year][sample]:
                                         files[year][sample][subsample_key] = []
                                     files[year][sample][subsample_key].extend(tfiles)
                                     print(f"\t\t\t\t\t{len(tfiles)} files added")
 
+                            # Handle MC case outside the f1 loop since it processes all files together
                             if not is_data:
                                 files[year][sample][subsample_name] = tfiles
                                 print(f"\t\t\t\t\t{len(tfiles)} files")
