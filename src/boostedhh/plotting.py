@@ -1138,6 +1138,15 @@ def multiROCCurve(
             # fontproperties="Tex Gyre Heros:bold",
         )
 
+    # if 'auc' in roc:
+    #     ax.text(
+    #         0.02,
+    #         0.83,
+    #         f"AUC: {roc['auc']:.2f}",
+    #         transform=ax.transAxes,
+    #         fontsize=20,
+    #     )
+
     if kin_label:
         ax.text(
             0.05,
@@ -1347,11 +1356,12 @@ def cutsLinePlot(
 
 def plot_hist(
     data,
-    names,
+    sample_names,
+    plot_dir="",
+    name="",
     nbins=100,
     weights=None,
     xlabel=None,
-    saveas=None,
     text=None,
     xlim=None,
     log=False,
@@ -1364,7 +1374,7 @@ def plot_hist(
     """Lightweight plotter for histograms.
     Args:
     data (list): List of data arrays to plot.
-    names (list): List of names for each data array.
+    sample_names (list): List of sample_names for each data array.
     nbins (int): Number of bins for the histogram.
     weights (list): List of weights for each data array.
     """
@@ -1374,13 +1384,13 @@ def plot_hist(
     fig, ax = plt.subplots(figsize=(12, 9))
     hep.cms.label("Preliminary", data=True, lumi=lumi, year=year, com=com)
     if weights is not None:
-        for d, w, name, c in zip(data, weights, names, colors[: len(data)]):
+        for d, w, sample_name, c in zip(data, weights, sample_names, colors[: len(data)]):
             ax.hist(
                 d,
                 bins=nbins,
                 weights=w,
                 range=xlim,
-                label=name,
+                label=sample_name,
                 color=c,
                 density=density,
                 log=log,
@@ -1388,12 +1398,12 @@ def plot_hist(
                 linewidth=2,
             )
     else:
-        for d, name, c in zip(data, names, colors[: len(data)]):
+        for d, sample_name, c in zip(data, sample_names, colors[: len(data)]):
             ax.hist(
                 d,
                 bins=nbins,
                 range=xlim,
-                label=name,
+                label=sample_name,
                 color=c,
                 density=density,
                 log=log,
@@ -1416,7 +1426,9 @@ def plot_hist(
     ax.set_ylabel("Normalized frequency")
     ax.set_xlim(xlim)
     ax.legend()
-    if saveas:
-        plt.savefig(saveas, bbox_inches="tight")
-        print(f"saved figure as {saveas}")
+
+    if len(name):
+        plt.savefig(f"{plot_dir}/{name}.pdf", bbox_inches="tight")
+        plt.savefig(f"{plot_dir}/{name}.png", bbox_inches="tight")
+
     plt.close()
