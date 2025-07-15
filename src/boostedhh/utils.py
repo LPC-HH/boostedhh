@@ -514,9 +514,11 @@ def load_sample(
 
     # find the directory that contains the sample
     for sp in sample_path:
-        spy = sp / year
-        full_samples_list = listdir(spy)  # get all directories in data_dir
-        load_samples = [str(s) for s in full_samples_list if sample.get_selector(year).match(s)]
+        spy = Path(sp) / year
+        full_samples_list = list(spy.iterdir())  # get all directories in data_dir
+        load_samples = [
+            s.name for s in full_samples_list if sample.get_selector(year).match(s.name)
+        ]
         if len(load_samples):
             sample_path = spy
             break
