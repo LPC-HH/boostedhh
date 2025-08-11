@@ -845,16 +845,30 @@ def multiROCCurveGreyOld(
         plt.close()
 
 
+# th_colours = [
+#     "#36213E",
+#     "#9381FF",
+#     "#1f78b4",
+#     "#a6cee3",
+#     "#32965D",
+#     "#7CB518",
+#     "#EDB458",
+#     "#ff7f00",
+#     "#a70000",
+# ]
+
+# Updated with CMS color palette
 th_colours = [
-    "#36213E",
-    # "#9381FF",
-    "#1f78b4",
-    "#a6cee3",
-    # "#32965D",
-    "#7CB518",
-    "#EDB458",
-    "#ff7f00",
-    "#a70000",
+    "#3f90da",
+    "#ffa90e",
+    "#bd1f01",
+    "#94a4a2",
+    "#832db6",
+    "#a96b59",
+    "#e76300",
+    "#b9ac70",
+    "#717581",
+    "#92dadd",
 ]
 
 
@@ -1124,6 +1138,15 @@ def multiROCCurve(
             # fontproperties="Tex Gyre Heros:bold",
         )
 
+    # if 'auc' in roc:
+    #     ax.text(
+    #         0.02,
+    #         0.83,
+    #         f"AUC: {roc['auc']:.2f}",
+    #         transform=ax.transAxes,
+    #         fontsize=20,
+    #     )
+
     if kin_label:
         ax.text(
             0.05,
@@ -1329,3 +1352,83 @@ def cutsLinePlot(
         plt.show()
     else:
         plt.close()
+
+
+def plot_hist(
+    data,
+    sample_names,
+    plot_dir="",
+    name="",
+    nbins=100,
+    weights=None,
+    xlabel=None,
+    text=None,
+    xlim=None,
+    log=False,
+    density=False,
+    int_xticks=False,
+    lumi=None,
+    year=None,
+    com=13.6,
+):
+    """Lightweight plotter for histograms.
+    Args:
+    data (list): List of data arrays to plot.
+    sample_names (list): List of sample_names for each data array.
+    nbins (int): Number of bins for the histogram.
+    weights (list): List of weights for each data array.
+    """
+
+    hep.style.use("CMS")
+    colors = plt.cm.tab10.colors
+    fig, ax = plt.subplots(figsize=(12, 9))
+    hep.cms.label("Preliminary", data=True, lumi=lumi, year=year, com=com)
+    if weights is not None:
+        for d, w, sample_name, c in zip(data, weights, sample_names, colors[: len(data)]):
+            ax.hist(
+                d,
+                bins=nbins,
+                weights=w,
+                range=xlim,
+                label=sample_name,
+                color=c,
+                density=density,
+                log=log,
+                histtype="step",
+                linewidth=2,
+            )
+    else:
+        for d, sample_name, c in zip(data, sample_names, colors[: len(data)]):
+            ax.hist(
+                d,
+                bins=nbins,
+                range=xlim,
+                label=sample_name,
+                color=c,
+                density=density,
+                log=log,
+                histtype="step",
+                linewidth=2,
+            )
+    if xlabel:
+        ax.set_xlabel(xlabel)
+    if text is not None:
+        ax.text(
+            0.02,
+            0.6,
+            text,
+            fontsize=13,
+            bbox={"facecolor": "white", "edgecolor": "black"},
+            transform=ax.transAxes,
+        )
+    if int_xticks:
+        ax.xaxis.get_major_locator().set_params(integer=True)
+    ax.set_ylabel("Normalized frequency")
+    ax.set_xlim(xlim)
+    ax.legend()
+
+    if len(name):
+        plt.savefig(f"{plot_dir}/{name}.pdf", bbox_inches="tight")
+        plt.savefig(f"{plot_dir}/{name}.png", bbox_inches="tight")
+
+    plt.close()
