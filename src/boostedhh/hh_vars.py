@@ -193,13 +193,7 @@ samples_run3_sig = {
 }
 
 bbtt_sigs = {
-    # "2022": {
-    #     "bbtt": ["GluGlutoHHto2B2Tau_kl-1p00_kt-1p00_c2-0p00_LHEweights_TuneCP5_13p6TeV_powheg-pythia8"]
-    # }
-    # "2022EE": {
-    #     "bbtt": ["GluGlutoHHto2B2Tau_kl-1p00_kt-1p00_c2-0p00_TuneCP5_13p6TeV_powheg-pythia8"]
-    # },
-    "bbtt": "GluGlutoHHto2B2Tau_kl-1p00_kt-1p00_c2-0p00",
+    "ggfbbtt": "GluGlutoHHto2B2Tau_kl-1p00_kt-1p00_c2-0p00",
     "vbfbbtt": "VBFHHto2B2Tau_CV_1_C2V_1_C3_1",
     "vbfbbtt-k2v0": "VBFHHto2B2Tau_CV_1_C2V_0_C3_1",
 }
