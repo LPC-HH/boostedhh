@@ -20,7 +20,7 @@ from boostedhh import utils
 
 t2_redirectors = {
     "lpc": "root://cmseos.fnal.gov//",
-    "ucsd": "root://redirector.t2.ucsd.edu:1095//",
+    "ucsd": "root://redirector.t2.ucsd.edu:1094//",
 }
 
 REPO_DICT = {"bbbb": "HH4b", "bbtautau": "bbtautau"}
