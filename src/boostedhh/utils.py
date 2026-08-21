@@ -437,15 +437,16 @@ def _normalize_weights(
 
     # check weights are scaled
     if "weight_noxsec" in events and np.all(events["weight"] == events["weight_noxsec"]):
-        # print(sample)
-        if "VBF" in sample or "GluGlutoHHto2B2Tau" in sample:
+        if sample in xsecs:
             warnings.warn(
                 f"Temporarily scaling {sample} by its xsec and lumi - remember to remove after fixing in the processor!",
                 stacklevel=0,
             )
             events["weight"] = events["weight"] * xsecs[sample] * LUMI[year]
         else:
-            raise ValueError(f"{sample} has not been scaled by its xsec and lumi!")
+            raise ValueError(
+                f"{sample} has not been scaled by its xsec and lumi, and no xsecs['{sample}'] entry exists to patch it here!"
+            )
 
     events["finalWeight"] = events["weight"] / totals["np_nominal"]
 
@@ -541,7 +542,9 @@ def load_sample(
             continue
 
         # empty parquet directory (skimmer failed or produced no events)
-        parquet_files = list(parquet_path.glob("*.parquet")) if parquet_path.is_dir() else [parquet_path]
+        parquet_files = (
+            list(parquet_path.glob("*.parquet")) if parquet_path.is_dir() else [parquet_path]
+        )
         if not parquet_files:
             warnings.warn(
                 f"Empty parquet directory for {load_sample}! Skimmer may have failed or produced no events. "
