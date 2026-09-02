@@ -147,6 +147,40 @@ xsecs["ggZH_Hto2C_Zto2Q_M-125"] = 0.1360 * BR_ZQQ * BR_HCC
 # 0.3319 (0.5742 from xsecdb, 0.5742*BR_HBB=0.334)
 xsecs["ttHto2B_M-125"] = 0.5700 * BR_HBB
 
+# Higgs for 2024: for now just copied, without the M-125 suffix
+# SX: took XSDB NLO number (0.5246) and multiplied it by the NNLO/NLO ratio for inclusive ggH from 13 TeV
+xsecs["GluGluHto2B_PT-200"] = 0.5246 * (43.92 / 27.8) * BR_HBB
+# https://twiki.cern.ch/twiki/bin/view/LHCPhysics/LHCHWG136TeVxsec_extrap (updated 2024-03 for mH=125.0)
+xsecs["GluGluHto2B"] = 52.23 * BR_HBB  # 30.34
+xsecs["VBFHto2B_dipoleRecoilOn"] = 4.078 * BR_HBB  # 2.368
+xsecs["VBFHto2B"] = xsecs["VBFHto2B_dipoleRecoilOn"]
+# 0.2229 (0.3916 from xsecdb, but missing Hdecay, 0.3916*BR_HBB=0.227)
+xsecs["WminusH_Hto2B_Wto2Q"] = 0.5677 * BR_WQQ * BR_HBB
+# 0.1068 (0.1887 from xsecdb, but missing Hdecay, 0.1887*BR_HBB=0.1096)
+xsecs["WminusH_Hto2B_WtoLNu"] = 0.5677 * BR_WLNU * BR_HBB
+# 0.349 (0.623 from xsecdb, but missing Hdecay, 0.623*BR_HBB=0.3619)
+xsecs["WplusH_Hto2B_Wto2Q"] = 0.8889 * BR_WQQ * BR_HBB
+# 0.1673 (0.3001 from xsecdb, but missing Hdecay, 0.3001*BR_HBB=0.1743)
+xsecs["WplusH_Hto2B_WtoLNu"] = 0.8889 * BR_WLNU * BR_HBB
+# 0.01635 (0.08545 from xsecdb, 0.08545*BR_HBB=0.049)
+xsecs["ZH_Hto2B_Zto2L"] = 0.9439 * BR_ZLL * BR_HBB
+# 0.3833 (0.5958 from xsecdb, 0.5958*BR_HBB=0.346)
+xsecs["ZH_Hto2B_Zto2Q"] = 0.9439 * BR_ZQQ * BR_HBB
+# 0.1486 (0.01351 from xsecdb, 0.01351*BR_HBB=0.00784)
+xsecs["ZH_Hto2B_Zto2Nu"] = 0.9439 * BR_ZNUNU * BR_HBB
+# 0.019 (0.5958 from xsecdb, 0.5958*BR_HCC=0.0172)
+xsecs["ZH_Hto2C_Zto2Q"] = 0.9439 * BR_ZQQ * BR_HCC
+# 0.00235 (0.006838 from xsecdb, 0.006838*BR_HBB=0.00397)
+xsecs["ggZH_Hto2B_Zto2L"] = 0.1360 * BR_ZLL * BR_HBB
+# 0.0214 (0.01351 from xsecdb, 0.01351*BR_HBB=0.00784)
+xsecs["ggZH_Hto2B_Zto2Nu"] = 0.1360 * BR_ZNUNU * BR_HBB
+# 0.055 (0.04776 from xsecdb, 0.04776*BR_HBB=0.0277)
+xsecs["ggZH_Hto2B_Zto2Q"] = 0.1360 * BR_ZQQ * BR_HBB
+# 0.0027 (0.04776 from xsecdb, 0.04776*BR_HCC=0.00138)
+xsecs["ggZH_Hto2C_Zto2Q"] = 0.1360 * BR_ZQQ * BR_HCC
+# 0.3319 (0.5742 from xsecdb, 0.5742*BR_HBB=0.334)
+xsecs["ttHto2B"] = 0.5700 * BR_HBB
+
 # Triple-higgs
 # SM sample
 xsecs["HHHTo6B_c3_1_d4_0"] = 2.908e-05 * BR_HBB * BR_HBB * BR_HBB  # (from xsecdb)
@@ -269,6 +303,18 @@ xsecs["Wto2Q-2Jets_PTQQ-400to600_1J"] = 3.496
 xsecs["Wto2Q-2Jets_PTQQ-400to600_2J"] = 12.75
 xsecs["Wto2Q-2Jets_PTQQ-600_1J"] = 0.4221
 xsecs["Wto2Q-2Jets_PTQQ-600_2J"] = 2.128
+
+# Add for 2024 W/Z+Jets
+xsecs["Wto2Q-2Jets_PTQQ-100"] = 1751.0
+xsecs["Wto2Q-2Jets_PTQQ-200"] = 164.3
+xsecs["Wto2Q-2Jets_PTQQ-400"] = 9.205
+xsecs["Wto2Q-2Jets_PTQQ-600"] = 2.23
+xsecs["Zto2Q-2Jets_PTQQ-100"] = 695.0
+xsecs["Zto2Q-2Jets_PTQQ-200"] = 71.56
+xsecs["Zto2Q-2Jets_PTQQ-400"] = 3.811
+xsecs["Zto2Q-2Jets_PTQQ-600"] = 0.5086
+
+
 xsecs["Zto2Q-2Jets_PTQQ-100to200_1J"] = 302.0
 xsecs["Zto2Q-2Jets_PTQQ-100to200_2J"] = 343.9
 xsecs["Zto2Q-2Jets_PTQQ-200to400_1J"] = 21.64
@@ -287,11 +333,35 @@ xsecs["WtoLNu-4Jets_1J"] = 9625.0
 xsecs["WtoLNu-4Jets_2J"] = 3161.0
 xsecs["WtoLNu-4Jets_3J"] = 1468.0
 
+# WtoLNu-2Jets 2024 samples
+xsecs["WtoLNu-2Jets_PTLNu-40to100_1J"] = 4211
+xsecs["WtoLNu-2Jets_PTLNu-100to200_1J"] = 342.3
+xsecs["WtoLNu-2Jets_PTLNu-200to400_1J"] = 21.84
+xsecs["WtoLNu-2Jets_PTLNu-400to600_1J"] = 0.6845
+xsecs["WtoLNu-2Jets_PTLNu-600_1J"] = 0.07753
+xsecs["WtoLNu-2Jets_PTLNu-40to100_2J"] = 1581
+xsecs["WtoLNu-2Jets_PTLNu-100to200_2J"] = 411.1
+xsecs["WtoLNu-2Jets_PTLNu-200to400_2J"] = 53.59
+xsecs["WtoLNu-2Jets_PTLNu-400to600_2J"] = 3.099
+xsecs["WtoLNu-2Jets_PTLNu-600_2J"] = 0.5259
+
 xsecs["DYto2L-4Jets_MLL-50"] = 5467.0
 xsecs["DYto2L-2Jets_MLL-50"] = 6688.0
-xsecs["DYto2L-2Jets_MLL-50_0J"] = 5378.0
-xsecs["DYto2L-2Jets_MLL-50_1J"] = 1017.0
-xsecs["DYto2L-2Jets_MLL-50_2J"] = 385.5
+xsecs["DYto2L-2Jets_MLL-50_0J"] = 5007.8 * 2 / 3  # 5378.0*BR to lep only
+xsecs["DYto2L-2Jets_MLL-50_1J"] = 955.3 * 2 / 3
+xsecs["DYto2L-2Jets_MLL-50_2J"] = 368.4 * 2 / 3
+
+xsecs["DYto2E-2Jets_MLL-50_0J"] = 5007.8 * 1 / 3
+xsecs["DYto2E-2Jets_MLL-50_1J"] = 955.3 * 1 / 3
+xsecs["DYto2E-2Jets_MLL-50_2J"] = 368.4 * 1 / 3
+
+xsecs["DYto2Mu-2Jets_MLL-50_0J"] = 5007.8 * 1 / 3
+xsecs["DYto2Mu-2Jets_MLL-50_1J"] = 955.3 * 1 / 3
+xsecs["DYto2Mu-2Jets_MLL-50_2J"] = 368.4 * 1 / 3
+
+xsecs["DYto2Tau-2Jets_MLL-50_0J"] = 5007.8 * 1 / 3
+xsecs["DYto2Tau-2Jets_MLL-50_1J"] = 955.3 * 1 / 3
+xsecs["DYto2Tau-2Jets_MLL-50_2J"] = 368.4 * 1 / 3
 
 xsecs["DYto2L-4Jets_MLL-50to120_HT-40to70"] = 316.7
 xsecs["DYto2L-4Jets_MLL-50to120_HT-70to100"] = 140.1
