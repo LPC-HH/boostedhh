@@ -255,12 +255,13 @@ def _asimov_significance(s, b):
 
 
 def add_cms_label(ax, year, data=True, label="Preliminary", loc=2, lumi=True):
-    if year == "all":
+    if year == "all" or isinstance(year, (list, tuple)):
+        label_years = years if year == "all" else year
         hep.cms.label(
             label,
             com=13.6,
             data=data,
-            lumi=f"{np.sum([LUMI[year] for year in years]) / 1e3:.0f}" if lumi else None,
+            lumi=f"{np.sum([LUMI[y] for y in label_years]) / 1e3:.0f}" if lumi else None,
             year=None,
             ax=ax,
             loc=loc,
@@ -1072,7 +1073,7 @@ def multiROCCurve(
                 label=roc["label"],
                 linewidth=3,
                 color=COLOURS[ROC_COLOURS[i * len(roc_sigs) + j]],
-                linestyle=LINESTYLES[i * len(roc_sigs) + j],
+                linestyle=LINESTYLES[(i * len(roc_sigs) + j) % len(LINESTYLES)],
             )
             pths = {th: [[], []] for th in pthresholds}
             for th in pthresholds:
