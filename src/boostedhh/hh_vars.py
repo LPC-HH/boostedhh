@@ -198,7 +198,6 @@ bbtt_sigs = {
     "ggfbbtt-kl0p00": "GluGlutoHHto2B2Tau_kl-0p00_kt-1p00_c2-0p00",
     "ggfbbtt-kl2p45": "GluGlutoHHto2B2Tau_kl-2p45_kt-1p00_c2-0p00",
     "ggfbbtt-kl5p00": "GluGlutoHHto2B2Tau_kl-5p00_kt-1p00_c2-0p00",
-
     "vbfbbtt": "VBFHHto2B2Tau_CV_1_C2V_1_C3_1",
     "vbfbbtt-k2v0": "VBFHHto2B2Tau_CV_1_C2V_0_C3_1",
     # BSM VBF samples: use regex [_-] to handle 2022/2022EE (hyphen) vs 2023/2023BPix (underscore) naming
@@ -424,7 +423,8 @@ jmsr_res["diboson"] = 14.4 * 80.0 / 125.0
 ttbarsfs_decorr_txbb_bins = [0, 0.8, 0.94, 0.99, 1]
 ttbarsfs_decorr_bdt_bins = [0.03, 0.3, 0.5, 0.7, 0.93, 1.0]
 
-txbbsfs_decorr_txbb_wps = OrderedDict(
+txbbsfs_decorr_txbb_wps = {}
+txbbsfs_decorr_txbb_wps["pnet-legacy"] = OrderedDict(
     [
         ("WP6", [0.92, 0.95]),
         ("WP5", [0.95, 0.975]),
@@ -434,8 +434,21 @@ txbbsfs_decorr_txbb_wps = OrderedDict(
         ("WP1", [0.998, 1]),
     ]
 )
+txbbsfs_decorr_txbb_wps["glopart-v2-vsqcdtop"] = OrderedDict(
+    [
+        ("WP8", [0.60, 0.65]),
+        ("WP7", [0.65, 0.70]),
+        ("WP6", [0.70, 0.75]),
+        ("WP5", [0.75, 0.80]),
+        ("WP4", [0.80, 0.85]),
+        ("WP3", [0.85, 0.90]),
+        ("WP2", [0.90, 0.95]),
+        ("WP1", [0.95, 1.0]),
+    ]
+)
 
-txbbsfs_decorr_pt_bins = OrderedDict(
+txbbsfs_decorr_pt_bins = {}
+txbbsfs_decorr_pt_bins["pnet-legacy"] = OrderedDict(
     [
         ("WP6", [200, 250, 300, 400, 500, 100000]),
         ("WP5", [200, 250, 300, 400, 500, 100000]),
@@ -445,11 +458,15 @@ txbbsfs_decorr_pt_bins = OrderedDict(
         ("WP1", [200, 400, 100000]),
     ]
 )
+txbbsfs_decorr_pt_bins["glopart-v2-vsqcdtop"] = OrderedDict(
+    [(f"WP{i}", [250, 300, 350, 425, 100000]) for i in range(1, 9)]
+)
 
 txbb_strings = {
     "pnet-legacy": "bbFatJetPNetTXbbLegacy",
     "pnet-v12": "bbFatJetPNetTXbb",
     "glopart-v2": "bbFatJetParTTXbb",
+    "glopart-v2-vsqcdtop": "bbFatJetParTXbbvsQCDTop",
 }
 
 mreg_strings = {
