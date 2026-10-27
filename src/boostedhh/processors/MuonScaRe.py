@@ -131,7 +131,7 @@ class CrystallBall:
 def get_rndm(eta, phi, nL, evtNr, lumiNr, cset, nested=False):
     # obtain parameters from correctionlib
     if nested:
-        eta_f, phi_f, nL_f, nmuons = ak.flatten(eta), ak.flatten(phi), ak.flatten(nL), ak.num(nL)
+        eta_f, phi_f, nL_f, nmuons = np.asarray(ak.flatten(eta)), np.asarray(ak.flatten(phi)), np.asarray(ak.flatten(nL)), ak.num(nL)
         evtNr_f  = np.repeat(np.asarray(evtNr),  nmuons)
         lumiNr_f = np.repeat(np.asarray(lumiNr), nmuons)
     else:
@@ -159,7 +159,7 @@ def get_rndm(eta, phi, nL, evtNr, lumiNr, cset, nested=False):
 
 def get_std(pt, eta, nL, cset, nested=False):
     if nested:
-        eta_f, nL_f, pt_f, nmuons = ak.flatten(eta), ak.flatten(nL), ak.flatten(pt), ak.num(nL)
+        eta_f, nL_f, pt_f, nmuons = np.asarray(ak.flatten(eta)), np.asarray(ak.flatten(nL)), np.asarray(ak.flatten(pt)), ak.num(nL)
     else:
         eta_f, nL_f, pt_f, nmuons = eta, nL, pt, 1
 
@@ -182,7 +182,7 @@ def get_std(pt, eta, nL, cset, nested=False):
 
 def get_k(eta, var, cset, nested=False):
     if nested:
-        eta_f, nmuons = ak.flatten(eta), ak.num(eta)
+        eta_f, nmuons = np.asarray(ak.flatten(eta)), ak.num(eta)
     else:
         eta_f = eta
 
@@ -285,8 +285,8 @@ def pt_resol_var(pt_woresol, pt_wresol, eta, updn, cset, nested=False):
     """
     
     if nested:
-        eta_f, nmuons = ak.flatten(eta), ak.num(eta)
-        pt_wresol_f, pt_woresol_f = ak.flatten(pt_wresol), ak.flatten(pt_woresol)
+        eta_f, nmuons = np.asarray(ak.flatten(eta)), ak.num(eta)
+        pt_wresol_f, pt_woresol_f = np.asarray(ak.flatten(pt_wresol)), np.asarray(ak.flatten(pt_woresol))
     else:
         eta_f, nmuons = eta, 1
         pt_wresol_f, pt_woresol_f = pt_wresol, pt_woresol
@@ -346,7 +346,7 @@ def pt_scale(is_data, pt, eta, phi, charge, cset, nested=False, low_pt_threshold
         dtmc = "mc"
 
     if nested:
-        eta_f, phi_f, nmuons = ak.flatten(eta), ak.flatten(phi), ak.num(eta)
+        eta_f, phi_f, nmuons = np.asarray(ak.flatten(eta)), np.asarray(ak.flatten(phi)), ak.num(eta)
     else:
         eta_f, phi_f, nmuons = eta, phi, 1
     
@@ -380,7 +380,7 @@ def pt_scale_var(pt, eta, phi, charge, updn, cset, nested=False):
     """
 
     if nested:
-        eta_f, phi_f, nmuons = ak.flatten(eta), ak.flatten(phi), ak.num(eta)
+        eta_f, phi_f, nmuons = np.asarray(ak.flatten(eta)), np.asarray(ak.flatten(phi)), ak.num(eta)
     else:
         eta_f, phi_f, pt_f, nmuons = eta, phi, pt, 1
 
